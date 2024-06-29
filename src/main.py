@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
 import timm
@@ -31,7 +32,11 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 # 訓練模型
-for epoch in range(2):  # 遍歷數據集兩次
+confidence = {}
+print("Start training")
+epochs = 5
+for epoch in range(epochs):
+    net.train()
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
         inputs, labels = data[0].to(device), data[1].to(device)
@@ -44,9 +49,23 @@ for epoch in range(2):  # 遍歷數據集兩次
         optimizer.step()
         
         running_loss += loss.item()
-        if i % 2000 == 1999:    # 每2000個mini-batches打印一次
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-            running_loss = 0.0
+
+    print(f'Epoch [{epoch + 1}/{epochs}], loss: {running_loss / len(trainloader):.3f}')
+
+    # EVALUATE
+    net.eval()
+    confidence_list = []
+
+    with torch.no_grad():
+        for inputs, labels in trainloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = net(inputs)
+            probs = F.softmax(outputs, dim=1)
+
+            for i in range(len(probs)):
+                confidence_list.append(probs[i][labels[i]].item())
+
+    confidence[epoch] = confidence_list
 
 print('Finished Training')
 
