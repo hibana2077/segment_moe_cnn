@@ -35,6 +35,7 @@ optimizer = tiopt.Lookahead(optim.AdamW(net.parameters(), lr=0.0001))
 
 # 訓練模型
 confidence = {}
+correctness = {}
 print("Start training")
 epochs = 10
 for epoch in range(epochs):
@@ -57,17 +58,29 @@ for epoch in range(epochs):
     # EVALUATE
     net.eval()
     confidence_list = []
+    correctness_list = []
 
     with torch.no_grad():
+        temp_outputs = np.array([])
+        temp_groundtruth = np.array([])
         for inputs, labels in trainloader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = net(inputs)
             probs = F.softmax(outputs, dim=1)
 
+            # add to temp_outputs and temp_groundtruth
+            temp_outputs = np.concatenate((temp_outputs, probs.max(1)[0].cpu().numpy()))
+            temp_groundtruth = np.concatenate((temp_groundtruth, labels.cpu().numpy()))
+
             for i in range(len(probs)):
                 confidence_list.append(probs[i][labels[i]].item())
 
+        print(f"Shape of temp_outputs: {temp_outputs.shape}")
+        print(f"Shape of temp_groundtruth: {temp_groundtruth.shape}")
+        correctness_list = (temp_outputs == temp_groundtruth).astype(int)
+
     confidence[epoch] = confidence_list
+    correctness[epoch] = correctness_list
 
 print('Finished Training')
 
@@ -85,11 +98,19 @@ with torch.no_grad():
 print(f'Accuracy of the network on the 10000 test images: {100 * correct / total}%')
 
 confidence_list = [[] for _ in range(len(confidence[0]))]
+correctness_list = [[] for _ in range(len(correctness[0]))]
 for epoch in confidence:
     for i in range(len(confidence[epoch])):
         confidence_list[i].append(confidence[epoch][i])
 
+for epoch in correctness:
+    for i in range(len(correctness[epoch])):
+        correctness_list[i].append(correctness[epoch][i])
+
 confidence_list = np.array(confidence_list)
+correctness_list = np.array(correctness_list)
+print(f"Confidence list shape: {confidence_list.shape}")
+print(f"Correctness list shape: {correctness_list.shape}")
 
 mean = np.mean(confidence_list, axis=1)
 std = np.std(confidence_list, axis=1)
@@ -99,10 +120,9 @@ variability = std / mean
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 5))
-plt.scatter(variability, mean, c='r', marker='x')
+plt.scatter(variability, mean, c=correctness_list, cmap='coolwarm')
 plt.xlabel('Variability')
 plt.ylabel('Mean')
-plt.xlim(0, 1)
 plt.ylim(0, 1)
 plt.title('Data map')
 plt.savefig('data_map.png')
