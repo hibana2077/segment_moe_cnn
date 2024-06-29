@@ -116,11 +116,13 @@ mean = np.mean(confidence_list, axis=1)
 std = np.std(confidence_list, axis=1)
 variability = std / mean
 
+correctness_mean = np.mean(correctness_list, axis=1)
+
 # plot mean and variability (dot plot)
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 5))
-plt.scatter(variability, mean, c=correctness_list, cmap='coolwarm')
+plt.scatter(variability, mean, c=correctness_mean, cmap='coolwarm')
 plt.xlabel('Variability')
 plt.ylabel('Mean')
 plt.ylim(0, 1)
