@@ -109,6 +109,8 @@ for epoch in correctness:
 
 confidence_list = np.array(confidence_list)
 correctness_list = np.array(correctness_list)
+confidence_list = confidence_list.T
+correctness_list = correctness_list.T
 print(f"Confidence list shape: {confidence_list.shape}")
 print(f"Correctness list shape: {correctness_list.shape}")
 
@@ -123,6 +125,7 @@ import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 5))
 plt.scatter(variability, mean, c=correctness_mean, cmap='coolwarm')
+plt.colorbar()
 plt.xlabel('Variability')
 plt.ylabel('Mean')
 plt.ylim(0, 1)
