@@ -69,14 +69,12 @@ for epoch in range(epochs):
             probs = F.softmax(outputs, dim=1)
 
             # add to temp_outputs and temp_groundtruth
-            temp_outputs = np.concatenate((temp_outputs, probs.max(1)[0].cpu().numpy()))
+            temp_outputs = np.concatenate((temp_outputs, np.argmax(probs.cpu().numpy(), axis=1)))
             temp_groundtruth = np.concatenate((temp_groundtruth, labels.cpu().numpy()))
 
             for i in range(len(probs)):
                 confidence_list.append(probs[i][labels[i]].item())
 
-        print(f"Shape of temp_outputs: {temp_outputs.shape}")
-        print(f"Shape of temp_groundtruth: {temp_groundtruth.shape}")
         correctness_list = (temp_outputs == temp_groundtruth).astype(int)
 
     confidence[epoch] = confidence_list
@@ -109,8 +107,6 @@ for epoch in correctness:
 
 confidence_list = np.array(confidence_list)
 correctness_list = np.array(correctness_list)
-confidence_list = confidence_list.T
-correctness_list = correctness_list.T
 print(f"Confidence list shape: {confidence_list.shape}")
 print(f"Correctness list shape: {correctness_list.shape}")
 
