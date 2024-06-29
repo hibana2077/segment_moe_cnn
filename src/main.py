@@ -19,10 +19,10 @@ transform = transforms.Compose([
 ])
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
+trainloader = DataLoader(trainset, batch_size=4, shuffle=True)
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
+testloader = DataLoader(testset, batch_size=4, shuffle=False)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -95,12 +95,14 @@ mean = np.mean(confidence_list, axis=1)
 std = np.std(confidence_list, axis=1)
 variability = std / mean
 
-import matplotlib.pyplot as plt
 # plot mean and variability (dot plot)
+import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 5))
 plt.scatter(variability, mean, c='r', marker='x')
 plt.xlabel('Variability')
 plt.ylabel('Mean')
+plt.xlim(0, 1)
+plt.ylim(0, 1)
 plt.title('Data map')
 plt.savefig('data_map.png')
