@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import timm
+import timm.optim as tiopt
 
 from torch.utils.data import DataLoader
 
@@ -30,7 +31,7 @@ net = timm.create_model('resnet18').to(device)
 
 # 定義損失函數和優化器
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = tiopt.Lookahead(optim.AdamW(net.parameters(), lr=0.0001))
 
 # 訓練模型
 confidence = {}
@@ -89,7 +90,6 @@ for epoch in confidence:
         confidence_list[i].append(confidence[epoch][i])
 
 confidence_list = np.array(confidence_list)
-print(confidence_list.shape)
 
 mean = np.mean(confidence_list, axis=1)
 std = np.std(confidence_list, axis=1)
