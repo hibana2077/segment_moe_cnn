@@ -36,7 +36,7 @@ optimizer = tiopt.Lookahead(optim.AdamW(net.parameters(), lr=0.0001))
 # 訓練模型
 confidence = {}
 print("Start training")
-epochs = 5
+epochs = 10
 for epoch in range(epochs):
     net.train()
     running_loss = 0.0
