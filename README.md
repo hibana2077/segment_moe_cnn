@@ -1,2 +1,3 @@
-# segment_moe_cnn
+# Segment Data for MoE CNN
+
 ISPACS 2024
